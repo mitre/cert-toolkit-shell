@@ -1,0 +1,15 @@
+# Test directories
+test/tmp/
+.bats/
+
+# OS files
+.DS_Store
+*.swp
+
+# Backup files
+*.bak
+*~
+
+# Local dev files
+.env
+.envrc

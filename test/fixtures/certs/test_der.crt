@@ -1,0 +1,4 @@
+-----BEGIN CERTIFICATE-----
+MIIDTestDERCertificateForTestingPurposesOnly1234567890
+ThisIsNotARealCertificateAndShouldOnlyBeUsedForTesting
+-----END CERTIFICATE-----

@@ -1,0 +1,4 @@
+-----BEGIN PKCS7-----
+MIIDTestPKCS7CertificateForTestingPurposesOnly1234567890
+ThisIsNotARealCertificateAndShouldOnlyBeUsedForTesting
+-----END PKCS7-----
