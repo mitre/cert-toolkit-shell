@@ -1,0 +1,44 @@
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            setup: |
+              sudo apt-get update
+              sudo apt-get install -y bats curl openssl wget
+          - os: macos-latest
+            setup: |
+              brew install bats-core coreutils openssl@3 gnu-sed wget
+              echo "/opt/homebrew/opt/coreutils/libexec/gnubin" >> $GITHUB_PATH
+              echo "/opt/homebrew/opt/gnu-sed/libexec/gnubin" >> $GITHUB_PATH
+              echo "/opt/homebrew/opt/openssl@3/bin" >> $GITHUB_PATH
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup environment
+        run: ${{ matrix.setup }}
+
+      - name: Run verification tests
+        run: bats test/00-verify-setup.bats
+        env:
+          DEBUG: true
+
+      - name: Run unit tests
+        run: bats test/unit/
+
+      - name: Run integration tests
+        run: bats test/integration/
+
+      - name: Run all tests with coverage
+        if: success()
+        run: |
+          bats --tap --print-output-on-failure test/
