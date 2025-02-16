@@ -2,12 +2,25 @@
 
 # Setup test environment
 setup_test_env() {
+    # Create test directories
     TEST_DIR="$(mktemp -d)"
     FIXTURES_DIR="${BATS_TEST_DIRNAME}/../fixtures"
     MOCK_DIR="${TEST_DIR}/mock_bin"
+
+    # Export variables for test environment
     export TEST_DIR FIXTURES_DIR MOCK_DIR
-    mkdir -p "${MOCK_DIR}"
     export PATH="${MOCK_DIR}:$PATH"
+
+    # Initialize metrics for testing
+    TOTAL_CERTS=0
+    PEM_CERTS=0
+    DER_CERTS=0
+    PKCS7_CERTS=0
+    FAILED_CERTS=0
+    SKIPPED_CERTS=0
+
+    # Create required directories
+    mkdir -p "${MOCK_DIR}"
 }
 
 # Cleanup test environment
@@ -18,7 +31,7 @@ cleanup_test_env() {
 # Load test certificates
 load_test_certs() {
     mkdir -p "${TEST_DIR}/certs"
-    cp "${FIXTURES_DIR}/certs/"* "${TEST_DIR}/certs/"
+    cp "${FIXTURES_DIR}/certs/"* "${TEST_DIR}/certs/" 2>/dev/null || true
 }
 
 # Create a test certificate
