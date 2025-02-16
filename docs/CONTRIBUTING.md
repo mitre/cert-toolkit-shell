@@ -1,4 +1,4 @@
-# Contributing Guide
+# Contributing Guidelines
 
 ## Development Setup
 
@@ -9,6 +9,13 @@
 5. Submit PR
 
 ## Testing
+
+Please ensure all new code has appropriate test coverage. Review our [test plan](test-plan.md) for details on:
+
+- Test organization
+- Required test cases
+- Mock implementations
+- Test fixtures
 
 - Unit tests: `test/test_add_dod_certs.bats`
 - Shell compatibility: `test/shell_compatibility.bats`

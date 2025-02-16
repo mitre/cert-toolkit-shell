@@ -1,3 +1,18 @@
+# Code Review Documentation
+
+## Documentation References
+
+- [Certificate Management](certificate-management.md)
+- [Test Plan](test-plan.md)
+- [Contributing Guidelines](CONTRIBUTING.md)
+
+## Review Areas
+
+1. Test Coverage
+   - Unit tests following [test plan](test-plan.md)
+   - Integration tests
+   - Shell compatibility tests
+
 # Code Review Status
 
 ## Files Pending Review
