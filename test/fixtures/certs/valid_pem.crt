@@ -1,0 +1,5 @@
+-----BEGIN CERTIFICATE-----
+MIIDTestCertificateForTestingPurposesOnly
+ThisIsNotARealCertificateAndShouldOnly
+BeUsedForTestingTheCertToolkitShell
+-----END CERTIFICATE-----
