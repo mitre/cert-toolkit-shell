@@ -510,55 +510,108 @@ declare -i SKIPPED_CERTS=0 # Add skipped certificates counter
 
 # Update verify_certificate function to track metrics
 verify_certificate() {
-    local cert_file=$1
-    local verbose=${2:-false}
+    local cert_file="$1"
+    local update_metrics=${2:-true}
     local temp_cert
+    local status=1
+    local initial_total=$TOTAL_CERTS
 
-    ((TOTAL_CERTS++))
-
-    if [ ! -f "$cert_file" ] || [ ! -s "$cert_file" ]; then
-        ((SKIPPED_CERTS++))
-        ((TOTAL_CERTS--))
+    # Basic file checks first
+    if [[ ! -f "$cert_file" ]]; then
+        $DEBUG && echo -e "${FAIL}File not found: $cert_file${RSET}"
+        echo "Certificate file not found: $cert_file"
+        [[ "$update_metrics" == "true" ]] && ((SKIPPED_CERTS++))
         return 1
     fi
 
-    # Try different certificate formats
-    if openssl x509 -noout -in "$cert_file" 2>/dev/null; then
-        if $verbose; then
-            echo -e "${VERB}Valid PEM certificate${RSET}"
-        fi
-        ((PEM_CERTS++))
-        return 0
+    if [[ ! -s "$cert_file" ]]; then
+        $DEBUG && echo -e "${FAIL}Empty file: $cert_file${RSET}"
+        echo "Empty certificate file: $cert_file"
+        [[ "$update_metrics" == "true" ]] && ((FAILED_CERTS++))
+        return 1
     fi
 
-    # Try converting potential PKCS7 to PEM
-    temp_cert=$(mktemp)
-    if openssl pkcs7 -noout -in "$cert_file" 2>/dev/null; then
-        if $verbose; then
-            echo -e "${VERB}Converting PKCS7 to PEM...${RSET}"
+    $DEBUG && {
+        echo -e "${VERB}Verifying certificate: $cert_file${RSET}"
+        echo -e "${VERB}File info:${RSET}"
+        echo -e "${VERB}  Size: $(wc -c <"$cert_file") bytes${RSET}"
+        if command -v file >/dev/null 2>&1; then
+            echo -e "${VERB}  Type: $(file "$cert_file")${RSET}"
         fi
-        if openssl pkcs7 -print_certs -in "$cert_file" >"$temp_cert" 2>/dev/null; then
-            mv "$temp_cert" "$cert_file"
-            ((PKCS7_CERTS++))
+        echo -e "${VERB}  Header: $(head -c 32 "$cert_file" | xxd)${RSET}"
+        echo -e "${VERB}  Content (first 5 lines):${RSET}"
+        head -n 5 "$cert_file" | sed 's/^/    /' >&2
+    }
+
+    # Check for private key first
+    if grep -q "BEGIN.*PRIVATE KEY" "$cert_file" 2>/dev/null; then
+        $DEBUG && echo -e "${VERB}File appears to be a private key, attempting key validation...${RSET}"
+
+        # Try RSA key validation
+        if openssl rsa -check -noout -in "$cert_file" 2>/dev/null; then
+            $DEBUG && echo -e "${PASS}Valid RSA private key detected${RSET}"
             return 0
         fi
-    fi
-    rm -f "$temp_cert"
 
-    # Try converting potential DER to PEM
-    temp_cert=$(mktemp)
-    if openssl x509 -inform DER -in "$cert_file" -out "$temp_cert" 2>/dev/null; then
-        if $verbose; then
-            echo -e "${VERB}Converting DER to PEM...${RSET}"
+        # Try DSA key validation
+        if openssl dsa -check -noout -in "$cert_file" 2>/dev/null; then
+            $DEBUG && echo -e "${PASS}Valid DSA private key detected${RSET}"
+            return 0
         fi
-        mv "$temp_cert" "$cert_file"
-        ((DER_CERTS++))
+
+        # Try EC key validation
+        if openssl ec -check -noout -in "$cert_file" 2>/dev/null; then
+            $DEBUG && echo -e "${PASS}Valid EC private key detected${RSET}"
+            return 0
+        fi
+
+        $DEBUG && echo -e "${FAIL}Invalid private key format${RSET}"
+        echo "invalid private key: $cert_file"
+        return 1
+    fi
+
+    # Try certificate validations
+    $DEBUG && echo -e "${VERB}Attempting PEM validation...${RSET}"
+    if openssl x509 -noout -in "$cert_file" 2>/dev/null; then
+        $DEBUG && echo -e "${PASS}Valid PEM certificate detected${RSET}"
+        [[ "$update_metrics" == "true" ]] && {
+            ((PEM_CERTS++))
+            ((TOTAL_CERTS++))
+        }
         return 0
     fi
-    rm -f "$temp_cert"
 
-    ((FAILED_CERTS++))
-    ((TOTAL_CERTS--)) # Decrement total for failed certificates
+    $DEBUG && echo -e "${VERB}Attempting DER validation...${RSET}"
+    if openssl x509 -inform DER -noout -in "$cert_file" 2>/dev/null; then
+        $DEBUG && echo -e "${PASS}Valid DER certificate detected${RSET}"
+        [[ "$update_metrics" == "true" ]] && {
+            ((DER_CERTS++))
+            ((TOTAL_CERTS++))
+        }
+        return 0
+    fi
+
+    $DEBUG && echo -e "${VERB}Attempting PKCS7 validation...${RSET}"
+    if openssl pkcs7 -print_certs -in "$cert_file" 2>/dev/null | grep -q "BEGIN CERTIFICATE"; then
+        $DEBUG && {
+            echo -e "${PASS}Valid PKCS7 bundle detected${RSET}"
+            echo -e "${VERB}Certificates in bundle: $(openssl pkcs7 -print_certs -in "$cert_file" 2>/dev/null | grep -c "BEGIN CERTIFICATE")${RSET}"
+        }
+        [[ "$update_metrics" == "true" ]] && {
+            ((PKCS7_CERTS++))
+            ((TOTAL_CERTS++))
+        }
+        return 0
+    fi
+
+    # If all validations failed
+    $DEBUG && echo -e "${FAIL}All certificate format validations failed${RSET}"
+    echo "invalid certificate: $cert_file"
+    [[ "$update_metrics" == "true" ]] && {
+        ((FAILED_CERTS++))
+        # If TOTAL_CERTS was incremented by another function, decrement it
+        [[ $TOTAL_CERTS -gt $initial_total ]] && ((TOTAL_CERTS--))
+    }
     return 1
 }
 
@@ -770,8 +823,32 @@ update_ca_certificates() {
     debug_metrics "After update-ca-certificates"
 }
 
-# Only execute
+# Only execute if not being sourced
 if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
+    # Process -D flag and override DEBUG setting if specified
+    if [[ " $* " =~ " -D " ]]; then
+        DEBUG=true
+        echo -e "${VERB}Debug mode enabled${RSET}"
+    fi
+
+    # Handle commands first
+    case "${1:-}" in
+    verify)
+        if [ -z "${2:-}" ]; then
+            echo -e "${FAIL}Error: verify command requires a certificate file${RSET}"
+            show_help
+            exit 1
+        fi
+        verify_certificate "$2"
+        exit $?
+        ;;
+    esac
+
+    # Skip normal processing if this was a command
+    if [[ "${1:-}" == "verify" ]]; then
+        exit 0
+    fi
+
     # Initialize counters and arrays
     declare -A BUNDLE_METRICS
     BUNDLE_METRICS=() # Explicitly initialize the associative array
