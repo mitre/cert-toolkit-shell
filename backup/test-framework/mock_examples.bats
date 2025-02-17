@@ -1,14 +1,19 @@
 #!/usr/bin/env bats
 
-load '../test_helper'
-load '../lib/mock_helper'
+# Load bats libraries first
+load "$(brew --prefix)/lib/bats-support/load.bash"
+load "$(brew --prefix)/lib/bats-assert/load.bash"
+
+# Load from helper directory
+load "${BATS_TEST_DIRNAME}/../helper/mock_command"
 
 setup() {
-    setup_test_environment
-    reset_mocks
+    TEST_TEMP="$(mktemp -d)"
+    setup_mock_tracking
 }
 
 teardown() {
+    rm -rf "${TEST_TEMP}"
     reset_mocks
 }
 
