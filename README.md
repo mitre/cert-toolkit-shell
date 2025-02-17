@@ -13,6 +13,19 @@ cert-toolkit-shell/
 └── backup/           # Original script backup
 ```
 
+## Dependencies
+
+The script requires the following packages:
+
+- curl: For downloading certificates
+- gawk: For text processing
+- openssl: For certificate operations
+- unzip: For extracting DoD bundles
+- wget: For downloading bundles
+- xmllint (libxml2-utils): For parsing HTML
+- file: For certificate type detection
+- vim-common: For xxd hex dump utility
+
 ## Features
 
 - Multi-source certificate management
