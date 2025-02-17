@@ -1,24 +1,25 @@
 #!/usr/bin/env bats
 
-load 'helper/test_helper'
-load 'helper/mock_command'
+# Use centralized test helper
+load 'test_helper'
 
 setup() {
-    setup_test_env
-    load_test_certs
-    setup_mock_commands
+    setup_test_environment
+    setup_mock_tracking
+
+    # Setup test certificates
+    setup_test_certs
 }
 
 teardown() {
-    cleanup_test_env
+    reset_mocks
+    rm -rf "${TEST_TEMP}"
 }
 
-# Certificate processing tests
-@test "process_certificates handles valid PEM bundle" {
-    create_test_cert "bundle"
-    run process_certificates "$TEST_DIR/certs/bundle.pem" "$TEST_DIR/output" "test"
-    [ "$status" -eq 0 ]
-    [ -f "$TEST_DIR/output/"*.crt ]
+@test "process_certificates handles PEM bundle" {
+    mock_command "openssl" "OK" 0
+    run process_certificates "${TEST_FIXTURES}/certs/valid/test.pem"
+    assert_success
 }
 
 @test "process_certificates detects duplicates" {

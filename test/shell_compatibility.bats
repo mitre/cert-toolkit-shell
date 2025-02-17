@@ -1,18 +1,20 @@
 #!/usr/bin/env bats
 
-load 'helper/test_helper'
+# Use centralized test helper
+load 'test_helper'
 
 setup() {
-    setup_test_env
+    setup_test_environment
+    setup_mock_tracking
 }
 
 teardown() {
-    cleanup_test_env
+    reset_mocks
 }
 
 @test "script runs in bash" {
-    run bash "${BATS_TEST_DIRNAME}/../src/cert-manager.sh" --help
-    [ "$status" -eq 0 ]
+    run bash "${PROJECT_ROOT}/src/cert-manager.sh" --help
+    assert_success
 }
 
 @test "script runs in zsh" {

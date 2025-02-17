@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-# Load test helper directly
+# Use single consistent test helper
 load 'test_helper'
 
 # Enhanced debug output in setup
@@ -118,8 +118,10 @@ show_environment() {
 }
 
 @test "verify test environment variables" {
-    show_environment
+    # Use setup_test_environment from test_utils
     setup_test_environment
+
+    show_environment
 
     # Test paths are set and exist
     assert [ -n "${TEST_ROOT}" ]
