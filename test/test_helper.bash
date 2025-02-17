@@ -1,46 +1,71 @@
 #!/usr/bin/env bash
 
-# Load BATS helpers
-load "$(brew --prefix)/lib/bats-support/load.bash"
-load "$(brew --prefix)/lib/bats-assert/load.bash"
-load "$(brew --prefix)/lib/bats-file/load.bash"
+# Load BATS test dependencies
+if [ -d "/usr/lib/bats/bats-support" ]; then
+    load "/usr/lib/bats/bats-support/load"
+    load "/usr/lib/bats/bats-assert/load"
+else
+    echo "ERROR: bats-support not found in /usr/lib/bats/bats-support" >&2
+    exit 1
+fi
 
-# Global state for test environment
-export BATS_TEST_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-export PROJECT_ROOT="$(cd "${BATS_TEST_ROOT}/.." && pwd)"
-export TEST_ROOT="${BATS_TEST_ROOT}"
-export TEST_FIXTURES="${TEST_ROOT}/fixtures"
-export TEST_TEMP="${BATS_TMPDIR:-/tmp}/bats-$$"
+# Set up project paths
+export PROJECT_ROOT="$BATS_TEST_DIRNAME/.."
+export TEST_ROOT="$BATS_TEST_DIRNAME"
+export TEST_TEMP="$(mktemp -d)"
 
-# Debug helper - more concise output
-debug() {
-    if [[ "${DEBUG:-}" == "true" ]]; then
-        printf "# %-20s: %s\n" "$1" "$2" >&3
-    fi
-}
-
-# Global setup function
-setup_test_environment() {
-    mkdir -p "${TEST_FIXTURES}" "${TEST_TEMP}"
-
-    if [[ "${DEBUG:-}" == "true" ]]; then
-        debug "Test Paths" "--------"
-        debug "PROJECT_ROOT" "${PROJECT_ROOT}"
-        debug "TEST_ROOT" "${TEST_ROOT}"
-        debug "TEST_FIXTURES" "${TEST_FIXTURES}"
-        debug "TEST_TEMP" "${TEST_TEMP}"
-    fi
-}
-
-# Default setup (will be called before each test)
+# Basic setup
 setup() {
-    setup_test_environment
+    if [[ "${DEBUG:-}" == "true" ]]; then
+        echo "Loading cert-manager.sh from ${PROJECT_ROOT}/src/cert-manager.sh" >&3
+        echo "PROJECT_ROOT=${PROJECT_ROOT}" >&3
+        echo "Working dir: $(pwd)" >&3
+        ls -la "${PROJECT_ROOT}/src" >&3
+    fi
+
+    # Source the script with error checking
+    if [ ! -f "${PROJECT_ROOT}/src/cert-manager.sh" ]; then
+        echo "ERROR: cert-manager.sh not found at ${PROJECT_ROOT}/src/cert-manager.sh" >&2
+        return 1
+    fi
+
+    # Create temporary environment for sourcing
+    (
+        # Unset all relevant variables that might affect sourcing
+        unset BASH_ENV
+        unset CDPATH
+        unset ENV
+        unset BATS_TEST_ARGV
+        unset BATS_TEST_NAME
+
+        # Set critical environment variables
+        export SCRIPT_NAME="cert-manager.sh"
+        export BASH_SOURCE[0]="${PROJECT_ROOT}/src/cert-manager.sh"
+        export SOURCING_FOR_TEST=true
+
+        # Source the script
+        # shellcheck disable=SC1090
+        source "${PROJECT_ROOT}/src/cert-manager.sh"
+    )
+    local rc=$?
+
+    if [[ "${DEBUG:-}" == "true" ]]; then
+        echo "cert-manager.sh sourced with exit code: $rc" >&3
+    fi
+
+    return $rc
 }
 
-# Cleanup with debug info
+# Basic teardown
 teardown() {
     if [[ -d "${TEST_TEMP}" && -n "${TEST_TEMP}" ]]; then
-        debug "Cleanup" "${TEST_TEMP}"
         rm -rf "${TEST_TEMP}"
+    fi
+}
+
+# Debug helper
+debug() {
+    if [[ "${DEBUG:-}" == "true" ]]; then
+        echo "# $*" >&3
     fi
 }
