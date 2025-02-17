@@ -36,3 +36,22 @@ mock_system_commands() {
     mkdir -p "$tmpbin"
     PATH="$tmpbin:$PATH"
 }
+
+# BATS specific helper functions
+bats_require_minimum_version() {
+    local minimum_version="$1"
+    if [[ -z "${BATS_VERSION:-}" ]]; then
+        return 0
+    fi
+
+    if [[ "$BATS_VERSION" < "$minimum_version" ]]; then
+        echo "BATS version $minimum_version or higher is required" >&2
+        exit 1
+    fi
+}
+
+# Setup BATS environment
+setup_bats_env() {
+    BATS_TEST_DIRNAME="$(cd "${BATS_TEST_DIRNAME}" && pwd)"
+    PATH="${BATS_TEST_DIRNAME}/../../bin:$PATH"
+}

@@ -12,40 +12,87 @@ declare -g -A MOCK_CALL_COUNTS=()
 declare -g -i TOTAL_MOCK_CALLS=0
 declare -g -a MOCKED_FUNCTIONS=()
 
-# Create a mock command
+# Initialize mock tracking
+setup_mock_tracking() {
+    MOCK_CALLS=()
+    MOCK_OUTPUTS=()
+    MOCK_STATUSES=()
+    MOCK_PATTERNS=()
+    MOCK_CALL_COUNTS=()
+    TOTAL_MOCK_CALLS=0
+    MOCKED_FUNCTIONS=()
+}
+
+# Create a mock command with tracing
 mock_command() {
     local name=$1
     local output=${2:-""}
     local status=${3:-0}
     local pattern=${4:-".*"}
 
+    # Special handling for 'command' built-in
+    if [[ "$name" == "command" ]]; then
+        eval '
+            command() {
+                local args="$*"
+                local count=${MOCK_CALL_COUNTS[command]:-0}
+                MOCK_CALLS[command_$count]="$args"
+                ((MOCK_CALL_COUNTS[command]++))
+                ((TOTAL_MOCK_CALLS++))
+                
+                debug_mock_call "command" "$args"
+                
+                case "$1" in
+                    -v)
+                        echo "/usr/bin/$2"
+                        return 0
+                        ;;
+                    *)
+                        [ -n "$output" ] && echo "$output"
+                        return $status
+                        ;;
+                esac
+            }
+        '
+        export -f command
+        return
+    fi
+
+    # Sanitize command name for function creation
+    local safe_name
+    safe_name=$(echo "$name" | tr -c '[:alnum:]' '_')
+
     # Track this mock for cleanup
-    MOCKED_FUNCTIONS+=("$name")
+    MOCKED_FUNCTIONS+=("$safe_name")
 
-    # Initialize arrays for this mock if needed
-    MOCK_CALLS["${name}_count"]=0
-    MOCK_OUTPUTS["$name"]=$output
-    MOCK_STATUSES["$name"]=$status
-    MOCK_PATTERNS["$name"]=$pattern
-    MOCK_CALL_COUNTS["$name"]=0
+    # Initialize arrays for this mock
+    MOCK_CALLS["${safe_name}_count"]=0
+    MOCK_OUTPUTS["$safe_name"]=$output
+    MOCK_STATUSES["$safe_name"]=$status
+    MOCK_PATTERNS["$safe_name"]=$pattern
+    MOCK_CALL_COUNTS["$safe_name"]=0
 
-    # Create the mock function with proper variable handling
+    # Create the mock function
     eval "
-        $name() {
+        $safe_name() {
             local args=\$*
-            local count=\${MOCK_CALL_COUNTS[$name]}
-            MOCK_CALLS[${name}_\$count]=\"\$args\"
-            MOCK_CALL_COUNTS[$name]=\$((count + 1))
-            TOTAL_MOCK_CALLS=\$((TOTAL_MOCK_CALLS + 1))
-
-            if [[ \"\$args\" =~ ${MOCK_PATTERNS[$name]} ]]; then
-                [ -n \"${MOCK_OUTPUTS[$name]}\" ] && echo \"${MOCK_OUTPUTS[$name]}\"
-                return ${MOCK_STATUSES[$name]}
-            fi
-            return 1
+            local count=\${MOCK_CALL_COUNTS[$safe_name]}
+            MOCK_CALLS[${safe_name}_\$count]=\"\$args\"
+            ((MOCK_CALL_COUNTS[$safe_name]++))
+            ((TOTAL_MOCK_CALLS++))
+            
+            debug_mock_call \"$name\" \"\$args\"
+            
+            [ -n \"$output\" ] && echo \"$output\"
+            return $status
         }
     "
-    export -f "$name"
+    export -f "$safe_name"
+
+    # Create alias if name differs from safe_name
+    if [[ "$name" != "$safe_name" ]]; then
+        alias "$name"="$safe_name"
+    fi
 }
 
 # Assert mock was called
