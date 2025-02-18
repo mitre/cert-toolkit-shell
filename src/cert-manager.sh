@@ -62,13 +62,15 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Set debug mode if specified
-[[ "${DEBUG:-false}" == "true" || "${CERT_TOOLKIT_DEBUG:-false}" == "true" ]] && {
+# Set debug mode if specified in environment
+if [[ "${DEBUG:-false}" == "true" || "${CERT_TOOLKIT_DEBUG:-false}" == "true" ]]; then
+    export DEBUG=true
+    export CERT_TOOLKIT_DEBUG=true
     echo "Debug mode enabled"
     echo "Script directory: ${SCRIPT_DIR}"
     echo "Library directory: ${LIB_DIR}"
     ls -la "${LIB_DIR}"
-}
+fi
 
 # Load core module which handles all other module loading
 if ! source "${LIB_DIR}/core.sh"; then

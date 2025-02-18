@@ -19,6 +19,11 @@ declare -A CONFIG=(
     # CRITICAL: Debug initialization
     # This must be initialized from environment immediately
     # Other modules depend on this being set correctly at load time
+    # The order of precedence is:
+    # 1. Command line --debug flag
+    # 2. DEBUG environment variable
+    # 3. CERT_TOOLKIT_DEBUG environment variable
+    # 4. CONFIG[DEBUG] default value
     [DEBUG]="${DEBUG:-${CERT_TOOLKIT_DEBUG:-false}}"
     # URLs
     [DOD_CERT_URL]='https://public.cyber.mil/pki-pke/pkipke-document-library/'
@@ -67,15 +72,26 @@ declare -a DEFAULT_ORG_CERTS=(
 
 # Initialize configuration from environment
 init_env_config() {
-    # CRITICAL: Debug propagation
-    # This section must run first to ensure proper debug state
-    # Do not move or modify without careful testing
-    if [[ "${DEBUG:-false}" == "true" || "${CERT_TOOLKIT_DEBUG:-false}" == "true" || "${CONFIG[DEBUG]}" == "true" ]]; then
+    # CRITICAL: Debug state initialization
+    # The order of operations is critical:
+    # 1. Check all possible debug sources
+    # 2. Set all debug mechanisms if any are true
+    # 3. Export environment variables last
+
+    # First, capture the debug state from all sources
+    local debug_enabled=false
+    if [[ "${DEBUG:-false}" == "true" ||
+        "${CERT_TOOLKIT_DEBUG:-false}" == "true" ||
+        "${CONFIG[DEBUG]:-false}" == "true" ]]; then
+        debug_enabled=true
+    fi
+
+    # Now set all debug mechanisms consistently
+    if [[ "$debug_enabled" == "true" ]]; then
         CONFIG[DEBUG]="true"
         export DEBUG=true
         export CERT_TOOLKIT_DEBUG=true
-        # Ensure debug is initialized before using debug function
-        echo "Debug mode enabled via environment" >&2
+        debug "Debug mode enabled via environment"
     else
         CONFIG[DEBUG]="false"
         unset DEBUG CERT_TOOLKIT_DEBUG
@@ -265,7 +281,22 @@ print_config() {
     local verbose="${1:-false}"
 
     echo -e "${HIGH}Current Configuration:${RSET}"
-    echo -e "${VERB}Certificate Directories:${RSET}"
+
+    # Standard debug state reporting
+    # 1. Config status
+    echo -e "\nDebug Mode: $(get_config DEBUG)"
+    # 2. User notification if debug is enabled
+    [[ "$(get_config DEBUG)" == "true" ]] && echo "Debug mode enabled"
+
+    # 3. Environment state (only in verbose mode)
+    if [[ "$verbose" == "true" ]]; then
+        echo -e "\nDebug Environment:"
+        echo "DEBUG=${DEBUG:-false}"
+        echo "CERT_TOOLKIT_DEBUG=${CERT_TOOLKIT_DEBUG:-false}"
+    fi
+
+    # Rest of configuration display
+    echo -e "\n${VERB}Certificate Directories:${RSET}"
     echo "  Base: $(get_config CERT_DIR)"
     echo "  DoD:  $(get_config CERT_DIR)/dod"
     echo "  Org:  $(get_config CERT_DIR)/org"

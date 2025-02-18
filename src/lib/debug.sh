@@ -6,6 +6,9 @@ if [[ -n "${DEBUG_LOADED:-}" ]]; then
 fi
 declare -r DEBUG_LOADED=true
 
+# Global configuration array
+declare -gA CONFIG
+
 # Debug levels
 declare -r DEBUG_LEVEL_ERROR=0
 declare -r DEBUG_LEVEL_WARN=1
@@ -21,6 +24,34 @@ DEBUG_LOG_FILE=""
 
 # Initialize debug system
 init_debug() {
+    # CRITICAL: Secondary Debug Synchronization
+    # Primary debug state is managed by config.sh's init_env_config()
+    # This function provides additional validation and synchronization:
+    # 1. Validates debug state is consistent
+    # 2. Ensures environment variables are in sync
+    # 3. Provides debug-specific initialization
+    # Note: CONFIG[DEBUG] should already be set by config.sh
+
+    if [[ "${DEBUG:-false}" == "true" || "${CERT_TOOLKIT_DEBUG:-false}" == "true" ]]; then
+        # Ensure all debug flags are set
+        export DEBUG=true
+        export CERT_TOOLKIT_DEBUG=true
+        CONFIG[DEBUG]="true"
+
+        # Output environment state explicitly
+        echo "Debug system initialized"
+        echo "DEBUG=$DEBUG"
+        echo "CERT_TOOLKIT_DEBUG=$CERT_TOOLKIT_DEBUG"
+    fi
+
+    # Ensure debug variables stay in sync
+    if [[ "${DEBUG:-false}" == "true" ]]; then
+        export CERT_TOOLKIT_DEBUG=true
+    elif [[ "${CERT_TOOLKIT_DEBUG:-false}" == "true" ]]; then
+        export DEBUG=true
+    fi
+
+    # Handle debug level and log file
     local log_file="${1:-}"
     local debug_level="${2:-$DEBUG_LEVEL_INFO}"
 
