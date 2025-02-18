@@ -1,5 +1,148 @@
 # Refactoring and Standardization TODO List
 
+## Next Session Workflow
+
+### Initial Focus
+
+1. Testing Framework Setup
+   - Load test/README.md for structure
+   - Review existing test fixtures in test/fixtures/
+   - Identify key test scenarios from core functionality
+   - Plan test organization by module
+
+### Module Relationships (for testing)
+
+- cert-manager.sh → core.sh → all modules
+- debug.sh → config.sh (critical debug initialization)
+- menu.sh → config.sh (command handling)
+- processors.sh → validators.sh (certificate processing)
+
+### Test Priority Order
+
+1. Core Module Tests
+   - Debug system (critical functionality)
+   - Configuration system (state management)
+   - Module loading (dependencies)
+
+2. Command Processing Tests
+   - Flag handling
+   - Help system
+   - Config commands
+   - Certificate commands
+
+3. Certificate Processing Tests
+   - Validation
+   - Processing
+   - Error handling
+
+### Key Test Scenarios
+
+1. Debug System
+   - Environment variable handling
+   - Flag processing
+   - Log levels
+   - State persistence
+
+2. Configuration
+   - Environment overrides
+   - Command line flags
+   - Default values
+   - Validation rules
+
+3. Certificate Processing
+   - File formats (PEM, DER, PKCS7)
+   - Error conditions
+   - Progress reporting
+   - Cleanup procedures
+
+## Prompt Setup for Claude 3.5 Sonnet
+
+```shell
+Here's what I need you to understand for our next session:
+
+1. Content of key files
+Please load these files first:
+- /Users/alippold/github/mitre/cert-toolkit/cert-toolkit-shell/src/lib/refactor-todo.md
+- /Users/alippold/github/mitre/cert-toolkit/cert-toolkit-shell/src/cert-manager.sh
+- /Users/alippold/github/mitre/cert-toolkit/cert-toolkit-shell/src/lib/core.sh
+- /Users/alippold/github/mitre/cert-toolkit/cert-toolkit-shell/src/lib/config.sh
+- /Users/alippold/github/mitre/cert-toolkit/cert-toolkit-shell/src/lib/menu.sh
+
+2. Project Context
+Content of refactor-todo.md, which contains:
+- Current project state
+- Planned work
+- Standards references
+- Documentation requirements
+
+3. Recent Work
+We've completed:
+- Module separation
+- Debug system implementation
+- Configuration system
+- Critical documentation of DEBUG handling
+
+4. Next Focus
+We're planning to work on:
+- Testing framework implementation
+- Remaining documentation standardization
+- Error handling standardization
+```
+
+## Project Setup and Context
+
+### Working Directory
+
+Base Path: `/Users/alippold/github/mitre/cert-toolkit/cert-toolkit-shell`
+
+### Critical Files
+
+- src/cert-manager.sh (Main entry point)
+- src/lib/core.sh (Module loader)
+- src/lib/config.sh (Configuration system)
+- src/lib/debug.sh (Debug/logging system)
+- src/lib/menu.sh (Command handling)
+- src/lib/metrics.sh (Statistics tracking)
+- src/lib/processors.sh (Certificate processing)
+- src/lib/validators.sh (Certificate validation)
+
+### Recent Changes
+
+- Modularized core functionality
+- Implemented robust debug system
+- Added configuration management
+- Standardized module loading
+- Added guard patterns
+- Fixed debug persistence issues
+
+### Next Focus Areas
+
+1. Testing Framework Implementation
+   - Unit test structure
+   - Test fixtures
+   - Integration tests
+   - CI/CD setup
+
+2. Documentation Standards
+   - Man pages
+   - Module docs
+   - Function docs
+   - README updates
+
+3. Error Handling
+   - Exit codes
+   - Error messages
+   - Debug levels
+   - Error recovery
+
+### State Management
+
+Debug and configuration state must be handled carefully:
+
+- Debug initialization in cert-manager.sh
+- Environment variables in config.sh
+- Module loading order in core.sh
+
 ## Commit Organization
 
 1. Initial module separation and structure
