@@ -148,6 +148,26 @@ test/fixtures/
 └── bundles/                 # Certificate bundles
     └── dod.zip             # DoD certificate bundle
 
+## Test Environment Setup
+
+### MITRE CA Bundle
+
+For tests to run successfully within MITRE's network, you need to:
+
+1. Copy the MITRE CA bundle to the test fixtures directory:
+
+```bash
+cp /path/to/mitre-ca-bundle.pem test/fixtures/mitre-ca-bundle.pem
+```
+
+2. Ensure the bundle is in PEM format and contains all required MITRE CAs
+
+This bundle is used by the test container to:
+
+- Enable secure git operations
+- Allow package downloads
+- Verify SSL connections during tests
+
 ## Running Tests
 
 ```bash
@@ -178,4 +198,78 @@ Tests run in isolated containers for each platform:
 
 # Run all tests
 ./test/docker
+```
+
+# Testing Framework Documentation
+
+## Key Learnings from Debug Tests
+
+1. Testing Approach
+   - Test through the application (`cert-manager.sh`) rather than testing functions directly
+   - This ensures we test the actual user experience
+   - Verifies the complete system state and initialization
+   - Matches real-world usage patterns
+
+2. Test Organization
+   - Start with environment validation tests
+   - Then test basic functionality
+   - Finally test state propagation and interactions
+   - Document manual test procedures in test files
+
+3. Debug State Testing
+   - Test all three debug activation methods:
+     - Environment variable DEBUG
+     - Environment variable CERT_TOOLKIT_DEBUG
+     - Command line flag --debug
+   - Verify debug state propagation
+   - Test override behavior
+   - Check command output rather than internal state
+
+4. Test File Structure
+
+   ```bash
+   # Manual Testing Reference (at top of test file)
+   # Document common test scenarios
+   # Show example commands
+   # List expected output
+
+   # Environment Setup
+   # Load modules in correct order
+   # Match application initialization
+
+   # Test Categories
+   - Environment validation
+   - Basic functionality
+   - State management
+   - Integration tests
+   ```
+
+5. Best Practices
+   - Use echo statements to show test state
+   - Test actual output rather than internal variables
+   - Match application behavior exactly
+   - Document manual test procedures
+   - Keep tests focused and atomic
+   - Use clear, descriptive test names
+
+## Git Commit Message
+
+```
+test: add comprehensive debug system tests
+
+- Add debug functionality tests
+- Add debug state propagation tests
+- Add debug flag override tests
+- Document test approach and learnings
+- Fix debug output in version command
+- Update test documentation
+
+Tests now verify:
+1. Debug environment variables
+2. Debug command line flags
+3. Debug state propagation
+4. Debug output formatting
+5. Debug override behavior
+
+Manual test procedures are now documented in test files.
 ```

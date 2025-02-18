@@ -31,6 +31,8 @@ LIB_DIR="${SCRIPT_DIR}/lib"
 # 2. Set environment variables
 # 3. Show initial debug output
 # 4. Load modules
+declare SHOW_VERSION=false
+
 while [[ $# -gt 0 ]]; do
     case "$1" in
     --debug | -d)
@@ -43,8 +45,8 @@ while [[ $# -gt 0 ]]; do
         shift
         ;;
     --version | -v)
-        echo "$SCRIPT_NAME version $VERSION"
-        exit 0
+        SHOW_VERSION=true
+        shift
         ;;
     --)
         shift
@@ -61,7 +63,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Set debug mode if specified
-[[ "${DEBUG:-false}" == "true" ]] && {
+[[ "${DEBUG:-false}" == "true" || "${CERT_TOOLKIT_DEBUG:-false}" == "true" ]] && {
     echo "Debug mode enabled"
     echo "Script directory: ${SCRIPT_DIR}"
     echo "Library directory: ${LIB_DIR}"
@@ -80,6 +82,13 @@ fi
 # Show help if requested (after debug flag processing)
 if [[ "${SHOW_HELP:-false}" == "true" ]]; then
     show_help
+    exit 0
+fi
+
+# Show version if requested (after debug flag processing)
+if [[ "$SHOW_VERSION" == "true" ]]; then
+    [[ "${DEBUG:-false}" == "true" || "${CERT_TOOLKIT_DEBUG:-false}" == "true" ]] && echo "Debug mode enabled"
+    echo "$SCRIPT_NAME version $VERSION"
     exit 0
 fi
 
