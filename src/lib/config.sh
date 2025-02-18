@@ -16,6 +16,10 @@ declare -r ENV_CERT_DIR="${ENV_PREFIX}CERT_DIR"
 
 # Configuration defaults
 declare -A CONFIG=(
+    # CRITICAL: Debug initialization
+    # This must be initialized from environment immediately
+    # Other modules depend on this being set correctly at load time
+    [DEBUG]="${DEBUG:-${CERT_TOOLKIT_DEBUG:-false}}"
     # URLs
     [DOD_CERT_URL]='https://public.cyber.mil/pki-pke/pkipke-document-library/'
     [ORG_CERT_BASE_URL]='https://pkirepo.mitre.org/Certificates'
@@ -63,7 +67,9 @@ declare -a DEFAULT_ORG_CERTS=(
 
 # Initialize configuration from environment
 init_env_config() {
-    # Process debug flag first - and make sure it propagates
+    # CRITICAL: Debug propagation
+    # This section must run first to ensure proper debug state
+    # Do not move or modify without careful testing
     if [[ "${DEBUG:-false}" == "true" || "${CERT_TOOLKIT_DEBUG:-false}" == "true" || "${CONFIG[DEBUG]}" == "true" ]]; then
         CONFIG[DEBUG]="true"
         export DEBUG=true

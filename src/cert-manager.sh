@@ -23,7 +23,14 @@ SCRIPT_NAME="${0##*/}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LIB_DIR="${SCRIPT_DIR}/lib"
 
-# Parse common flags before command processing
+# CRITICAL: Debug flag processing
+# This section must occur before any module loading or debug output
+# Debug state must be set early to ensure proper initialization
+# The order of operations is important:
+# 1. Parse debug flags
+# 2. Set environment variables
+# 3. Show initial debug output
+# 4. Load modules
 while [[ $# -gt 0 ]]; do
     case "$1" in
     --debug | -d)

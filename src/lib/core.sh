@@ -41,11 +41,14 @@ trap 'handle_signal EXIT' EXIT
 
 # Define module loading order
 # See: ./lib/README.md for order and module descriptions
+# CRITICAL: Module loading order
+# debug.sh must be loaded early but after utils.sh
+# config.sh must maintain debug state during initialization
 declare -ar MODULE_ORDER=(
-    "utils.sh"      # Base utilities (colors, system functions)
-    "debug.sh"      # Logging system
+    "utils.sh"      # Base utilities (required first)
+    "debug.sh"      # Logging system (required early)
     "metrics.sh"    # Metrics tracking
-    "config.sh"     # Configuration management
+    "config.sh"     # Configuration management (maintains debug state)
     "validators.sh" # Certificate validation
     "processors.sh" # Certificate processing
     "menu.sh"       # User interface
