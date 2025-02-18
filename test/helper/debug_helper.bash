@@ -161,3 +161,28 @@ debug_der_conversion() {
     echo "Using method: $(command -v xxd >/dev/null 2>&1 && echo "xxd" || echo "openssl")" >&3
     echo "=========================" >&3
 }
+
+# Run command with debug output
+run_with_debug() {
+    if [ "${DEBUG:-}" = "true" ]; then
+        debug "Running command" "$*"
+        run "$@"
+        debug "Exit status" "$status"
+        debug "Output" "$output"
+    else
+        run "$@"
+    fi
+}
+
+# Add to existing file...
+
+debug_test_env() {
+    if [[ "${DEBUG:-}" == "true" ]]; then
+        echo "=== Test Environment ===" >&3
+        echo "PATH: $PATH" >&3
+        echo "PWD: $(pwd)" >&3
+        echo "PROJECT_ROOT: $PROJECT_ROOT" >&3
+        echo "which cert-manager.sh: $(which cert-manager.sh 2>/dev/null || echo 'not found')" >&3
+        echo "======================" >&3
+    fi
+}

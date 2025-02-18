@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
-# Load bats-support and bats-assert
-load '../lib/bats-support/load'
-load '../lib/bats-assert/load'
+# Remove direct loading of bats-support/assert since it's now handled by load.bash
 
 # Setup test environment
 setup_suite() {
