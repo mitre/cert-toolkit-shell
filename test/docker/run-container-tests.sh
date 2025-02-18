@@ -51,8 +51,8 @@ while [[ $# -gt 0 ]]; do
         shift
         ;;
     *)
-        # Anything else is treated as test pattern
-        TEST_PATTERN="$1"
+        # Collect all test patterns
+        [[ -n "$TEST_PATTERN" ]] && TEST_PATTERN="$TEST_PATTERN $1" || TEST_PATTERN="$1"
         shift
         ;;
     esac
@@ -80,8 +80,14 @@ docker build -t cert-toolkit-test -f test/docker/ubuntu.Dockerfile .
     echo -e "\nScript directory: $(pwd)"
     echo "Command: $COMMAND"
     echo "Test pattern: ${TEST_PATTERN:-test/**/*.bats}"
+
+    # Show available test files using docker to handle glob patterns
     echo -e "\nAvailable test files:"
-    find test/debug -name "*.bats" -type f | sort | sed 's/^/  - /'
+    docker run --rm \
+        -v "$(pwd):/app" \
+        -w /app \
+        cert-toolkit-test \
+        bash -c 'shopt -s globstar nullglob; for f in test/**/*.bats; do echo "  - $f"; done | sort'
     echo ""
 }
 
@@ -98,6 +104,7 @@ shell)
     ;;
 test)
     echo -e "\nRunning tests...\n"
+    # Pass pattern directly to container, let it handle expansion
     docker run --rm -it \
         -v "$(pwd):/app" \
         -w /app \
@@ -105,11 +112,19 @@ test)
         cert-toolkit-test \
         bash -c '
             cd /app
-            # Find test files using pattern
-            mapfile -t test_files < <(find test/debug -name "*.bats" -type f | sort)
+            # Enable all pattern matching features
+            shopt -s globstar nullglob extglob
+
+            # If no pattern specified, run all tests
+            if [[ -z "'"$TEST_PATTERN"'" ]]; then
+                mapfile -t test_files < <(find test -name "*.bats" -type f | sort)
+            else
+                # Use pattern directly - shell will expand it inside container
+                test_files=('"$TEST_PATTERN"')
+            fi
 
             # Show what we found
-            echo "Found test files:"
+            echo -e "\nFound test files:\n"
             for file in "${test_files[@]}"; do
                 echo "  - $file"
             done
@@ -119,7 +134,7 @@ test)
                 echo -e "\nRunning ${#test_files[@]} test files...\n"
                 bats "${test_files[@]}"
             else
-                echo "No test files found"
+                echo "No test files found matching pattern: '"$TEST_PATTERN"'"
                 exit 1
             fi
         '
