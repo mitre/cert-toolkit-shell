@@ -13,38 +13,32 @@ Options:
     test            Run the test suite (default)
     shell           Start an interactive shell in the container
     help            Show this help message
-    -D              Enable debug output
-    --watch         Run tests in watch mode
-    --watch-debug   Run tests in watch mode with debug output
+    --debug, -d     Enable debug output
 
 Arguments:
-    test pattern    Optional pattern to match specific test files (e.g., "test/real/*.bats")
+    test pattern    Optional pattern to match specific test files (e.g., "test/debug/*.bats")
 EOF
     exit 1
 }
 
-# Process -D flag if present in any position
+# CRITICAL: Process debug flags first, regardless of position
+# This matches cert-manager.sh debug handling
 for arg in "$@"; do
-    if [[ "$arg" == "-D" ]]; then
-        DEBUG=true
+    if [[ "$arg" == "--debug" || "$arg" == "-d" ]]; then
+        export DEBUG=true
         break
     fi
 done
 
-# Parse arguments
-WATCH_MODE=false
+# Parse remaining arguments
 TEST_PATTERN=""
 COMMAND="test"
+ARGS=()
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-    --watch)
-        WATCH_MODE=true
-        shift
-        ;;
-    --watch-debug)
-        WATCH_MODE=true
-        export DEBUG=true
+    --debug | -d)
+        # Already handled above, just skip
         shift
         ;;
     test | shell | help)
@@ -80,10 +74,21 @@ docker rmi -f cert-toolkit-test 2>/dev/null || true
 echo "Building fresh container..."
 docker build -t cert-toolkit-test -f test/docker/ubuntu.Dockerfile .
 
+# Show debug info before test execution
+[[ "${DEBUG:-false}" == "true" ]] && {
+    echo -e "\nDebug mode enabled"
+    echo -e "\nScript directory: $(pwd)"
+    echo "Command: $COMMAND"
+    echo "Test pattern: ${TEST_PATTERN:-test/**/*.bats}"
+    echo -e "\nAvailable test files:"
+    find test/debug -name "*.bats" -type f | sort | sed 's/^/  - /'
+    echo ""
+}
+
 # Handle command options
 case "$COMMAND" in
 shell)
-    echo "Starting interactive shell..."
+    echo -e "\nStarting interactive shell..."
     docker run --rm -it \
         -v "$(pwd):/app" \
         -w /app \
@@ -92,13 +97,32 @@ shell)
         /bin/bash
     ;;
 test)
-    echo "Running tests..."
+    echo -e "\nRunning tests...\n"
     docker run --rm -it \
         -v "$(pwd):/app" \
         -w /app \
         -e "DEBUG=$DEBUG" \
         cert-toolkit-test \
-        bats ${TEST_PATTERN:-"test/**/*.bats"}
+        bash -c '
+            cd /app
+            # Find test files using pattern
+            mapfile -t test_files < <(find test/debug -name "*.bats" -type f | sort)
+
+            # Show what we found
+            echo "Found test files:"
+            for file in "${test_files[@]}"; do
+                echo "  - $file"
+            done
+
+            # Run tests if we found any
+            if [[ ${#test_files[@]} -gt 0 ]]; then
+                echo -e "\nRunning ${#test_files[@]} test files...\n"
+                bats "${test_files[@]}"
+            else
+                echo "No test files found"
+                exit 1
+            fi
+        '
     ;;
 help | --help | -h)
     usage
@@ -108,6 +132,3 @@ help | --help | -h)
     usage
     ;;
 esac
-
-$DEBUG && echo "Debug mode enabled, DEBUG=$DEBUG"
-echo "Done!"
