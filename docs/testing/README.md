@@ -58,6 +58,14 @@ test/
 └── fixtures/         # Test data
 ```
 
+## Testing Framework
+
+See [External Standards & References](../standards/references.md#testing) for:
+
+- BATS Testing Framework documentation
+- ShellCheck usage guidelines
+- Shell script testing best practices
+
 ## Related Documentation
 
 - [Coding Standards](../standards/coding.md)   # Fixed relative path

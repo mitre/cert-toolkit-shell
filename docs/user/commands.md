@@ -72,3 +72,10 @@ Options:
 - [Debug Guide](../tech/debug.md)            # Updated from DEBUG.md
 - [Configuration](../tech/config.md)         # Added missing reference
 - [User Guide](README.md)                    # Added missing reference
+
+## Command Line Interface Design
+
+Our command line interface follows industry standards:
+
+- [GNU/POSIX Guidelines](../standards/references.md#command-line-standards)
+- [Modern CLI Design](../standards/references.md#modern-cli-design)

@@ -48,3 +48,26 @@ Try 'program command --help' for more information.
 - [Configuration System](config.md)
 - [Debug System](debug.md)
 - [Architecture Guide](../dev/architecture.md)
+
+## Implementation Requirements
+
+- [Exit Code Standards](../dev/standardization.md#exit-codes)
+- [Error Message Standards](../dev/standardization.md#error-messages)
+- [Option Handling Standards](../dev/standardization.md#option-handling)
+- [Output Format Standards](../dev/standardization.md#output-formatting)
+
+## External Standards
+
+See [External Standards & References](../standards/references.md#command-line-standards) for:
+
+- GNU Command Line Interface Guidelines
+- POSIX Utility Conventions
+- Modern CLI Design Patterns
+
+## See Also
+
+- [Command Reference](../user/commands.md)
+- [Implementation Standards](../dev/standardization.md)
+- [Debug System](debug.md)
+- [Test Matrix](../testing/test-matrix.md)
+- [Contributing Guide](../dev/contributing.md)

@@ -88,7 +88,7 @@ process_cert() {
 
 ## Related Documentation
 
-- [Security Policy](../SECURITY.md)              # Updated path
+- [Security Policy](../../SECURITY.md)              # Updated to point to root
 - [License](../../../LICENSE.md)                 # Updated path
 - [Contributing Guide](../dev/contributing.md)    # Fixed relative path
 - [Architecture](../dev/architecture.md)         # Fixed relative path

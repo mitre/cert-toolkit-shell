@@ -20,6 +20,13 @@
    - Input validation
    - Error recovery
 
+## Standards Documentation
+
+1. [Coding Standards](coding.md)
+2. [Documentation Standards](documentation.md)
+3. [Security Standards](security.md)
+4. [External Standards & References](references.md)  # Added new reference
+
 ## Standards Compliance
 
 ### Shell Script Standards

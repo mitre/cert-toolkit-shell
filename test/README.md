@@ -273,3 +273,49 @@ Tests now verify:
 
 Manual test procedures are now documented in test files.
 ```
+
+# Test Framework
+
+## Directory Structure
+
+```bash
+test/
+├── core/           # Core functionality tests
+├── menu/           # Menu system tests
+├── integration/    # Cross-module tests
+└── fixtures/       # Test data and certificates
+```
+
+## Key Files
+
+- test_helper.bats: BATS test framework setup
+- test_helper.bash: Common Bash test utilities
+- fixtures/: Test certificates and configurations
+
+## Module Dependencies
+
+- cert-manager.sh → core.sh → all modules
+- debug.sh → config.sh (critical debug initialization)
+- menu.sh → config.sh (command handling)
+- processors.sh → validators.sh (certificate processing)
+
+## Related Documentation
+
+### Testing Guides
+
+- [Writing Tests](../docs/testing/writing-tests.md)
+- [Test Matrix](../docs/testing/test-matrix.md)
+- [Testing Standards](../docs/standards/testing.md)
+- [Test Workflow](../docs/testing/workflow.md)
+
+### Implementation
+
+- [Development Context](../docs/dev/context.md)
+- [Debug System](../docs/tech/debug.md)
+- [Menu System](../docs/tech/menu.md)
+- [Implementation Standards](../docs/dev/standardization.md)
+
+### Project Status
+
+- [Development Progress](../docs/dev/progress.md)
+- [Development TODO](../docs/dev/todo.md)

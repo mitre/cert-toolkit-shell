@@ -227,3 +227,10 @@ teardown() {
 - [Documentation Standards](documentation.md)
 - [Testing Standards](../testing/framework.md)
 - [Security Standards](security.md)
+
+## Related Documentation
+
+- [Implementation Guide](../dev/standardization.md)
+- [External Standards](references.md)  # Added new reference
+- [Documentation Standards](documentation.md)
+- [Security Standards](security.md)

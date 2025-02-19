@@ -35,6 +35,7 @@ All contributions must follow:
 - [Architecture Overview](architecture.md)           # Updated relative path
 - [Testing Guide](../testing/README.md)             # Updated from TESTING.md
 - [Debug System](../tech/debug.md)                  # Updated from DEBUG.md
+- [Implementation Standards](standardization.md)    # Added reference
 
 ## Development Process
 

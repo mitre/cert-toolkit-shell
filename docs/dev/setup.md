@@ -126,3 +126,11 @@ let g:ale_linters = {'sh': ['shellcheck']}
 - [Contributing Guide](contributing.md)  # Updated - includes code review process
 - [Testing Guide](../testing/README.md)
 - [Coding Standards](../standards/coding.md)
+
+## Development Standards
+
+Follow these guidelines for development:
+
+- [Shell Scripting Guidelines](../standards/references.md#shell-scripting)
+- [Documentation Standards](../standards/references.md#documentation)
+- [Testing Framework](../standards/references.md#testing)

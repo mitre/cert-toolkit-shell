@@ -39,21 +39,21 @@
 
 ### Testing Documentation
 
-1. [Testing Guide](testing/README.md)  # Updated from TESTING.md
+1. [Testing Guide](testing/README.md)     # Updated from TESTING.md
 2. [Test Matrix](testing/test-matrix.md)  # Updated from test-cases.md
-3. [Test Workflow](testing/workflow.md)  # Updated from test-plan.md
+3. [Test Workflow](testing/workflow.md)   # Updated from test-plan.md
 
 ### Project Information
 
-1. [Changelog](../../CHANGELOG.md)          # Updated to point to root
-2. [Security Policy](SECURITY.md)           # Keep in docs
-3. [License](../../LICENSE.md)              # Updated to point to root
+1. [Changelog](../../CHANGELOG.md)         # Updated to point to root
+2. [Security Policy](../../SECURITY.md)    # Updated to point to root
+3. [License](../../LICENSE.md)             # Updated to point to root
 
 ## Directory Structure
 
 ```
 docs/
-├── user/               # User documentation
+├── user/              # User documentation
 ├── dev/               # Developer guides
 ├── tech/              # Technical details
 ├── standards/         # Project standards
@@ -65,8 +65,9 @@ docs/
 
 - [Installation Guide](user/installation.md)
 - [Quick Start Guide](user/quickstart.md)
-- [Development Setup](dev/setup.md)      # Updated from development-setup.md
-- [Test Writing Guide](testing/writing-tests.md)  # New canonical location
+- [Development Setup](dev/setup.md)     # Updated from development-setup.md
+- [Test Writing Guide](testing/writing-tests.md)   # New canonical location
+- [External Standards](standards/references.md)  # Added new reference
 
 ## Documentation Map
 
