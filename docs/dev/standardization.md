@@ -102,6 +102,31 @@ See [Test Writing Guide](../testing/writing-tests.md) for details.
 - Performance tests
 ```
 
+## Development Workflow
+
+### Branch Model
+
+- Main branch (`main`) contains production-ready code
+- Feature branches created from `main`
+- Pull requests required for all changes
+- Squash merge to maintain clean history
+
+### Commit Standards
+
+```bash
+# Conventional Commits
+type(scope): description
+
+# Types
+feat:     New feature
+fix:      Bug fix
+docs:     Documentation
+test:     Adding/updating tests
+refactor: Code restructuring
+style:    Formatting changes
+chore:    Maintenance tasks
+```
+
 ## Standards References
 
 - See [External Standards & References](../standards/references.md) for detailed guidelines

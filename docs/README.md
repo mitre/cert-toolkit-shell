@@ -17,8 +17,8 @@
 
 ### For Developers
 
-1. [Architecture Overview](dev/architecture.md)     # Standardized name
-2. [Contributing Guide](dev/contributing.md)
+1. [Architecture Overview](dev/architecture.md)
+2. [Contributing](../CONTRIBUTING.md)        # Updated reference
    - Development Setup
    - Code Review Process
    - Pull Request Process
