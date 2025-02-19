@@ -74,4 +74,8 @@ utils.sh → debug.sh → config.sh → modules → menu.sh
 - [License](../../../LICENSE.md)                # Updated path
 - [Security Policy](../SECURITY.md)             # Updated path
 - [Changelog](../../../CHANGELOG.md)            # Updated path
-- [Contributing](../dev/contributing.md)         # Fixed relative path
+- [Contributing](../../CONTRIBUTING.md)  # Fixed path
+- [Implementation Standards](../dev/standardization.md)
+- [External Standards](../standards/references.md)
+
+```

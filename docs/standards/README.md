@@ -117,7 +117,7 @@ Try 'program --help' for more information.
 
 ## Related Documentation
 
-- [Contributing](../dev/contributing.md)     # Fixed from CONTRIBUTING.md
-- [Architecture](../dev/architecture.md)     # Fixed from ARCHITECTURE.md
-- [Testing](../testing/README.md)           # Fixed from TESTING.md
-- [Debug System](../tech/debug.md)          # Fixed from DEBUG.md
+- [Contributing](../../CONTRIBUTING.md)     # Updated path
+- [Architecture](../dev/architecture.md)
+- [Testing](../testing/README.md)
+- [Debug System](../tech/debug.md)

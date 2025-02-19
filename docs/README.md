@@ -82,8 +82,8 @@ Current documentation structure:
 
 ### Development
 
-- Contributing: [dev/contributing.md](dev/contributing.md)
-- Roadmap & Future Plans: [dev/roadmap.md](dev/roadmap.md)  # Updated description
+- Contributing: [../CONTRIBUTING.md](../CONTRIBUTING.md)  # Fixed from dev/contributing.md
+- Roadmap: [dev/roadmap.md](dev/roadmap.md)
 
 ### Technical Details
 

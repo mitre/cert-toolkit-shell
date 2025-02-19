@@ -224,13 +224,16 @@ teardown() {
 
 ## See Also
 
+- [Contributing](../../CONTRIBUTING.md)  # Updated path
 - [Documentation Standards](documentation.md)
 - [Testing Standards](../testing/framework.md)
 - [Security Standards](security.md)
 
 ## Related Documentation
 
+- [Contributing](../../CONTRIBUTING.md)  # Fixed path
 - [Implementation Guide](../dev/standardization.md)
-- [External Standards](references.md)  # Added new reference
 - [Documentation Standards](documentation.md)
 - [Security Standards](security.md)
+
+# Remove duplicate references
