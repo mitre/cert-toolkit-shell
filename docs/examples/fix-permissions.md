@@ -91,3 +91,9 @@ test/lib:Test Libraries
    - Optional debug output
    - Show before/after states
    - Clear progress indicators
+
+## Related Documentation
+
+- [Security Standards](../standards/security.md)    # Updated relative path
+- [Command Reference](../user/commands.md)         # Added missing reference
+- [Configuration Guide](../tech/config.md)         # Added missing reference
