@@ -16,13 +16,14 @@ declare -A COMMANDS=(
     [version]="Show version information"
 )
 
-# Standard flag definitions
+# Standard flag definitions (GNU compliance)
 declare -A STANDARD_FLAGS=(
-    [--help]="-h"
-    [--debug]="-d"
-    [--quiet]="-q"
-    [--verbose]="-v"
-    [--version]="-V"
+    # GNU standard order
+    [--help | -h]="Display help text"       # Help always first
+    [--version | -V]="Display version info" # Version always second
+    [--verbose | -v]="Show detailed output" # Output controls
+    [--quiet | -q]="Suppress normal output" # Output controls
+    [--debug | -d]="Enable debug mode"      # Special modes last
 )
 
 # Command-specific flag definitions
@@ -37,80 +38,103 @@ declare -A PROCESS_FLAGS=(
     [--log - file]="Enable logging to specified file"
 )
 
-# Show main help
+# Show main help (GNU/POSIX compliant)
 show_help() {
-    echo -e "${VERB}Usage: ${0##*/} [--debug] [--help] [command] [options]${RSET}"
-    echo -e "\n${HIGH}Global Options:${RSET}"
-    echo "  --debug, -d    Enable debug output"
-    echo "  --help, -h     Show this help message"
-    echo "  --version, -v  Show version information"
+    # Program name and brief (POSIX)
+    echo -e "${HIGH}NAME${RSET}"
+    echo "    ${SCRIPT_NAME} - ${DESCRIPTION}"
 
-    echo -e "\n${HIGH}Commands:${RSET}"
-    echo "  process  Process certificates (default command)"
-    echo "  verify   Verify a certificate file"
-    echo "  info     Show certificate information"
-    echo "  config   Show or update configuration"
-    echo "  help     Show this help message"
+    # Synopsis (POSIX)
+    echo -e "\n${HIGH}SYNOPSIS${RSET}"
+    echo "    ${SCRIPT_NAME} [OPTIONS] COMMAND [ARGS]"
 
-    echo -e "\n${HIGH}Process Options:${RSET}"
-    echo "  --ca-skip           Skip processing ca-certificates.crt"
-    echo "  --dod-skip          Skip processing DoD certificates"
-    echo "  --org-skip          Skip processing organization certificates"
-    echo "  --pem-file=FILE     Process organization certificates from combined PEM file"
-    echo "  --individual        Process individual organization certificates"
-    echo "  --fetch-dynamic     Fetch certificate list dynamically"
-    echo "  --skip-update       Skip updating CA certificates store"
-    echo "  --log-file=FILE     Enable logging to specified file"
+    # Description (GNU)
+    echo -e "\n${HIGH}DESCRIPTION${RSET}"
+    echo "    Certificate management tool for Linux systems."
 
-    echo -e "\n${HIGH}Examples:${RSET}"
-    echo "  ${0##*/} process --ca-skip --dod-skip --pem-file=my-certs.pem     Process combined PEM file"
-    echo "  ${0##*/} process --ca-skip --dod-skip --individual                Process static org cert list"
-    echo "  ${0##*/} process --ca-skip --dod-skip --individual --fetch-dynamic Use dynamic org certs list"
-    echo "  ${0##*/} verify cert.pem                                          Verify single certificate"
-    echo "  ${0##*/} info cert.pem -a                                         Show all certificate info"
+    # Options (GNU style)
+    echo -e "\n${HIGH}OPTIONS${RSET}"
+    for flag in "${!STANDARD_FLAGS[@]}"; do
+        printf "    %-20s %s\n" "$flag" "${STANDARD_FLAGS[$flag]}"
+    done
+
+    # Commands (CLIG style)
+    echo -e "\n${HIGH}COMMANDS${RSET}"
+    for cmd in "${!COMMANDS[@]}"; do
+        printf "    %-20s %s\n" "$cmd" "${COMMANDS[$cmd]}"
+    done
+
+    # Exit status (GNU)
+    echo -e "\n${HIGH}EXIT STATUS${RSET}"
+    echo "    0    Success"
+    echo "    1    General error"
+    echo "    2    Invalid usage"
+
+    # Examples (CLIG)
+    echo -e "\n${HIGH}EXAMPLES${RSET}"
+    echo "    ${SCRIPT_NAME} config --list"
+    echo "    ${SCRIPT_NAME} process --ca-skip"
 }
 
 # Show command-specific help
 show_command_help() {
     local command="$1"
-
     case "$command" in
     process)
         echo -e "${VERB}Usage: ${0##*/} process [options]${RSET}"
         echo -e "\n${HIGH}Options:${RSET}"
-        echo "  --ca-skip           Skip processing ca-certificates.crt"
-        echo "  --dod-skip          Skip processing DoD certificates"
-        echo "  --org-skip          Skip processing organization certificates"
-        echo "  --pem-file=FILE     Process organization certificates from combined PEM file"
-        echo "  --individual        Process individual organization certificates"
-        echo "  --fetch-dynamic     Fetch certificate list dynamically"
-        echo "  --skip-update       Skip updating CA certificates store"
-        echo "  --log-file=FILE     Enable logging to file"
+        for flag in "${!PROCESS_FLAGS[@]}"; do
+            printf "  %-20s  %s\n" "$flag" "${PROCESS_FLAGS[$flag]}"
+        done
         ;;
     verify)
-        echo -e "${VERB}Usage: ${0##*/} verify <certificate-file>${RSET}"
+        echo -e "${VERB}Usage: ${0##*/} verify <certificate-file> [options]${RSET}"
         echo -e "\n${HIGH}Options:${RSET}"
-        echo "  --debug, -d    Enable debug output"
+        echo "  --debug, -d     Enable debug output"
+        echo "  --verbose       Show detailed validation"
         ;;
     info)
         echo -e "${VERB}Usage: ${0##*/} info <certificate-file> [options]${RSET}"
         echo -e "\n${HIGH}Options:${RSET}"
-        echo "  -s       Show subject only"
-        echo "  -i       Show issuer only"
-        echo "  -d       Show dates only"
-        echo "  -a       Show all information"
+        echo "  -s              Show subject only"
+        echo "  -i              Show issuer only"
+        echo "  -d              Show dates only"
+        echo "  -a              Show all information (default)"
         ;;
     config)
         echo -e "${VERB}Usage: ${0##*/} config [options]${RSET}"
         echo -e "\n${HIGH}Options:${RSET}"
-        echo "  -s key=value  Set configuration value"
-        echo "  -l           List current configuration"
-        echo "  -v           Show verbose configuration"
+        echo "  --list, -l              List current configuration"
+        echo "  --verbose               Show detailed configuration"
+        echo "  --set KEY=VALUE         Set configuration value"
+        echo "  --help                  Show this help message"
         ;;
     *)
+        error "Unknown command: $command"
         show_help
+        return 1
         ;;
     esac
+
+    # Show global options for all commands
+    echo -e "\n${HIGH}Global Options:${RSET}"
+    for flag in "${!STANDARD_FLAGS[@]}"; do
+        printf "  %-20s  %s\n" "$flag" "${STANDARD_FLAGS[$flag]}"
+    done
+}
+
+# Show error messages (GNU format)
+error() {
+    echo -e "${FAIL}${SCRIPT_NAME}: error: ${1}${RSET}" >&2
+    echo "Try '${SCRIPT_NAME} --help' for more information." >&2
+}
+
+# Command error messages (GNU format)
+command_error() {
+    local cmd="$1"
+    local msg="$2"
+    echo -e "${FAIL}${SCRIPT_NAME}: $cmd: ${msg}${RSET}" >&2
+    echo "Try '${SCRIPT_NAME} $cmd --help' for more information." >&2
 }
 
 # Parse command line arguments
@@ -124,6 +148,13 @@ parse_args() {
         shift
     fi
 
+    # Validate command exists
+    if ! declare -F "cmd_$command" >/dev/null; then
+        error "Unknown command: $command"
+        show_help
+        return 1
+    fi
+
     # Show help without requiring initialization
     if [[ "$command" == "help" ]]; then
         [[ $# -gt 0 ]] && show_command_help "$1" || show_help
@@ -134,20 +165,12 @@ parse_args() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
         --*=*)
-            local key=${1%%=*}
-            local value=${1#*=}
+            local key="${1%%=*}"
+            local value="${1#*=}"
             args+=("$key" "$value")
             shift
             ;;
-        --*)
-            args+=("$1")
-            shift
-            [[ -n "${1:-}" && ! "$1" =~ ^- ]] && {
-                args+=("$1")
-                shift
-            }
-            ;;
-        -*)
+        --* | -*)
             args+=("$1")
             shift
             ;;
@@ -173,9 +196,10 @@ cmd_verify() {
         show_command_help "verify"
         return 0
     fi
+
     local cert_file="$1"
     debug "Verifying certificate: $cert_file"
-    validate_certificate "$cert_file" "verify" true # Changed to use validate_certificate
+    validate_certificate "$cert_file" "verify" true
 }
 
 cmd_info() {
@@ -183,6 +207,7 @@ cmd_info() {
         show_command_help "info"
         return 0
     fi
+
     local cert_file="$1"
     shift
     local info_type="all"
@@ -193,6 +218,10 @@ cmd_info() {
         i) info_type="issuer" ;;
         d) info_type="dates" ;;
         a) info_type="all" ;;
+        *)
+            error "Invalid option: -$OPTARG"
+            return 1
+            ;;
         esac
     done
 
@@ -220,7 +249,6 @@ cmd_config() {
             shift
             ;;
         --verbose | -v)
-            show_config=true
             verbose=true
             shift
             ;;
@@ -229,26 +257,26 @@ cmd_config() {
             if [[ -z "${1:-}" ]] || [[ ! "$1" =~ = ]]; then
                 error "Option --set requires KEY=VALUE argument"
                 show_command_help "config"
-                return $EXIT_INVALID_USAGE
+                return "$EXIT_INVALID_USAGE"
             fi
             local key="${1%%=*}"
             # Don't allow setting debug via --set
             if [[ "$key" == "DEBUG" ]]; then
                 error "DEBUG can only be set via environment or --debug flag"
-                return $EXIT_INVALID_USAGE
+                return "$EXIT_INVALID_USAGE"
             fi
             local value="${1#*=}"
             debug "Setting config: $key=$value"
             if ! set_config "$key" "$value"; then
                 show_command_help "config"
-                return $EXIT_INVALID_USAGE
+                return "$EXIT_INVALID_USAGE"
             fi
             shift
             ;;
         *)
             error "Invalid option: $1"
             show_command_help "config"
-            return $EXIT_INVALID_USAGE
+            return "$EXIT_INVALID_USAGE"
             ;;
         esac
     done
@@ -257,7 +285,7 @@ cmd_config() {
     if [[ "$show_config" == "true" ]]; then
         print_config "$verbose"
     fi
-    return $EXIT_SUCCESS
+    return "$EXIT_SUCCESS"
 }
 
 # Main menu function
