@@ -68,6 +68,8 @@ See [External Standards & References](../standards/references.md#testing) for:
 
 ## Related Documentation
 
-- [Coding Standards](../standards/coding.md)   # Fixed relative path
-- [Debug System](../tech/debug.md)            # Fixed from DEBUG.md
-- [Architecture](../dev/architecture.md)       # Fixed from ARCHITECTURE.md
+- [Contributing](../../CONTRIBUTING.md)  # Fixed path
+- [Implementation Standards](../dev/standardization.md)
+- [Debug System](../tech/debug.md)
+
+# Remove duplicate references
